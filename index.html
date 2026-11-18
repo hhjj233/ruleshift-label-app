@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RuleShift Labeling</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>RuleShift</b><span id="whoLabel" class="muted"></span></div>
+  <nav class="nav" aria-label="Photos">
+    <button type="button" id="prevBtn" class="btn icon" title="Previous photo (←)" aria-label="Previous photo">&#9664;</button>
+    <button type="button" id="posBtn" class="btn pos" title="All photos (G)"><span id="posText">–</span></button>
+    <button type="button" id="nextBtn" class="btn icon" title="Next photo (→)" aria-label="Next photo">&#9654;</button>
+    <button type="button" id="todoBtn" class="btn" title="Next photo with open questions (N)">Next unfinished</button>
+  </nav>
+  <div class="prog" title="Photos with every question answered"><div class="bar"><i id="progBar"></i></div><span id="progText">0 / 0</span></div>
+  <button type="button" id="syncBtn" class="btn sync" data-state="local"><span class="dot"></span><span id="syncText">Saved in this browser</span></button>
+  <div class="tools">
+    <a class="btn" id="guideLink" href="guide/index.html" target="_blank" rel="noopener">Guide</a>
+    <button type="button" id="exampleBtn" class="btn">Example</button>
+    <details class="menu" id="menu">
+      <summary class="btn">Menu</summary>
+      <div class="menu-list" role="menu">
+        <button type="button" role="menuitem" data-act="settings">Settings and GitHub</button>
+        <button type="button" role="menuitem" data-act="grid">All photos</button>
+        <button type="button" role="menuitem" data-act="compact"><span id="compactLabel">Short options</span></button>
+        <button type="button" role="menuitem" data-act="export">Download my answers (JSON)</button>
+        <button type="button" role="menuitem" data-act="import">Load answers from a file</button>
+        <button type="button" role="menuitem" data-act="help">Help and shortcuts</button>
+        <button type="button" role="menuitem" data-act="forget">Forget the token on this computer</button>
+      </div>
+    </details>
+  </div>
+</header>
+
+<main class="main">
+  <section class="viewer-col" aria-label="Photo">
+    <div class="viewer" id="viewer">
+      <div class="stage" id="stage"><img id="photo" alt="" draggable="false"><svg id="overlay" aria-hidden="true"></svg></div>
+      <div class="vtools">
+        <button type="button" class="vbtn" data-z="fit" title="Fit (F)">Fit</button>
+        <button type="button" class="vbtn" data-z="one" title="Actual pixels">1:1</button>
+        <button type="button" class="vbtn" data-z="in" title="Zoom in (+)" aria-label="Zoom in">+</button>
+        <button type="button" class="vbtn" data-z="out" title="Zoom out (−)" aria-label="Zoom out">−</button>
+        <button type="button" class="vbtn" id="boxBtn" title="Show or hide boxes (B)" aria-pressed="true">Boxes</button>
+        <a class="vbtn" id="openImg" target="_blank" rel="noopener" title="Open the photo in a new tab">Open</a>
+      </div>
+      <p class="vhint">Scroll to zoom · drag to move · double-click to fit</p>
+      <p class="vload" id="vload" hidden>Loading photo…</p>
+    </div>
+    <div class="info">
+      <div class="info-head"><b id="imgId"></b><span class="muted" id="imgPos"></span></div>
+      <ul class="devices" id="devices"></ul>
+      <p class="rw"><span class="muted">ROADWork tags:</span> <span id="tags"></span></p>
+      <p class="rw"><span class="muted">ROADWork description:</span> <span id="desc"></span></p>
+    </div>
+  </section>
+
+  <section class="form-col" aria-label="Questions">
+    <form id="form" class="form" autocomplete="off" novalidate></form>
+    <div class="form-foot">
+      <div id="checks" class="checks" aria-live="polite"></div>
+      <div class="foot-btns">
+        <button type="button" id="backBtn" class="btn">&#9664; Previous</button>
+        <button type="button" id="doneBtn" class="btn primary">Next photo &#9654;</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<dialog id="setupDlg" class="dlg">
+  <form method="dialog">
+    <h2>Set up</h2>
+    <div id="whoPick" class="field" hidden>
+      <span class="lbl">Which annotator are you?</span>
+      <div class="seg">
+        <label><input type="radio" name="who" value="A"> Annotator A</label>
+        <label><input type="radio" name="who" value="B"> Annotator B</label>
+      </div>
+    </div>
+    <p id="whoFixed" class="small" hidden></p>
+    <label class="field"><span class="lbl">Your name</span><input id="nameIn" type="text" maxlength="60" placeholder="First and last name"></label>
+    <h3>Save to GitHub</h3>
+    <p class="small">Paste the token your supervisor gave you. It lets this page save your answers to one GitHub repository, and it is kept only in this browser. Do not share it, and use <em>Forget the token</em> in the menu on a shared computer.</p>
+    <label class="field"><span class="lbl">GitHub token</span><input id="tokenIn" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+    <details class="adv">
+      <summary>Repository settings</summary>
+      <div class="adv-grid">
+        <label class="field"><span class="lbl">Owner</span><input id="ownerIn" type="text" spellcheck="false"></label>
+        <label class="field"><span class="lbl">Repository</span><input id="repoIn" type="text" spellcheck="false"></label>
+        <label class="field"><span class="lbl">Branch</span><input id="branchIn" type="text" spellcheck="false"></label>
+        <label class="field"><span class="lbl">Folder</span><input id="dirIn" type="text" spellcheck="false"></label>
+        <label class="field wide"><span class="lbl">API address</span><input id="apiIn" type="text" spellcheck="false"></label>
+      </div>
+    </details>
+    <p id="connMsg" class="msg" role="status"></p>
+    <div class="dlg-btns">
+      <button type="button" id="offlineBtn" class="btn">Work without GitHub</button>
+      <button type="button" id="connectBtn" class="btn primary">Connect</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="gridDlg" class="dlg wide">
+  <div class="dlg-head">
+    <h2>All photos</h2>
+    <div class="seg small-seg">
+      <label><input type="radio" name="gfilter" value="all" checked> All</label>
+      <label><input type="radio" name="gfilter" value="todo"> Unfinished</label>
+    </div>
+    <button type="button" class="btn" data-close>Close</button>
+  </div>
+  <p class="small legend"><span class="lg done"></span>all answered <span class="lg part"></span>started <span class="lg new"></span>not started</p>
+  <div id="grid" class="grid"></div>
+</dialog>
+
+<dialog id="exampleDlg" class="dlg wide">
+  <div class="dlg-head"><h2>Example 1 (from the guide)</h2><button type="button" class="btn" data-close>Close</button></div>
+  <div class="ex">
+    <img id="exImg" alt="Worked example: underpass with ROAD CLOSED signs and uncovered lane-use signs">
+    <div><table class="extbl" id="exTbl"></table><p class="small">More worked examples: <a href="guide/index.html#examples" target="_blank" rel="noopener">the guide</a>.</p></div>
+  </div>
+</dialog>
+
+<dialog id="helpDlg" class="dlg">
+  <div class="dlg-head"><h2>Help</h2><button type="button" class="btn" data-close>Close</button></div>
+  <h3>Saving</h3>
+  <p class="small">Every click is saved in this browser at once. With a token, your answers also go to GitHub a few seconds later and whenever you change photos. The button at the top right shows the state; click it to save now. To move to another computer, open the same link there and connect with the same token.</p>
+  <h3>Done</h3>
+  <p class="small">A photo counts as done when every question is answered. A note is needed when you choose unclear, ambiguous, cannot_tell, not_possible, other or a conflict. For photos with priority <code>exclude</code>, only the ego decision, the priority and a note are needed.</p>
+  <h3>Keys</h3>
+  <table class="keys">
+    <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>previous / next photo</td></tr>
+    <tr><td><kbd>N</kbd></td><td>next unfinished photo</td></tr>
+    <tr><td><kbd>G</kbd></td><td>all photos</td></tr>
+    <tr><td><kbd>F</kbd></td><td>fit the photo</td></tr>
+    <tr><td><kbd>+</kbd> <kbd>−</kbd></td><td>zoom</td></tr>
+    <tr><td><kbd>B</kbd></td><td>show or hide boxes</td></tr>
+  </table>
+  <p class="small muted">Photos: ROADWork dataset (Carnegie Mellon University), Open Data Commons Attribution License (ODC-By 1.0). Boxes and device IDs are drawn from ROADWork's annotations.</p>
+</dialog>
+
+<input type="file" id="importIn" accept=".json,application/json" hidden>
+<div id="toast" class="toast" role="status" hidden></div>
+<p id="fatal" class="fatal" hidden></p>
+
+<script src="data/common.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
