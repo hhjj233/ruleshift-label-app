@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RuleShift Admin</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin">
+<header class="top">
+  <div class="brand"><b>RuleShift</b><span class="muted">admin view · batch 1</span></div>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" data-tab="questions" aria-selected="true">Questions</button>
+    <button type="button" role="tab" data-tab="photos" aria-selected="false">Photos</button>
+    <button type="button" role="tab" data-tab="students" aria-selected="false">Students</button>
+  </nav>
+  <div class="tools">
+    <span id="connState" class="conn muted">Answers hidden</span>
+    <button type="button" id="refreshBtn" class="btn" hidden>Refresh</button>
+    <button type="button" id="connectBtn" class="btn">Connect</button>
+    <a class="btn" href="guide/index.html" target="_blank" rel="noopener">Guide</a>
+  </div>
+</header>
+
+<section id="pQuestions" class="pane" role="tabpanel" aria-label="Questions">
+  <div class="scroll"><div class="narrow-col" id="qlist"></div></div>
+</section>
+
+<section id="pPhotos" class="pane" role="tabpanel" aria-label="Photos" hidden>
+  <div class="scroll" id="gridWrap">
+    <div class="pbar" id="pfilters"></div>
+    <div class="pgrid" id="pgrid"></div>
+  </div>
+  <div class="detail" id="detail" hidden>
+    <div class="viewer-col">
+      <div class="dhead">
+        <button type="button" class="btn" id="backBtn">&#9664; All photos</button>
+        <button type="button" class="btn icon" id="dPrev" title="Previous (←)" aria-label="Previous photo">&#9664;</button>
+        <span id="dPos" class="muted"></span>
+        <button type="button" class="btn icon" id="dNext" title="Next (→)" aria-label="Next photo">&#9654;</button>
+        <b id="dId" class="did-text"></b>
+        <span id="dBadges" class="badges inline"></span>
+      </div>
+      <div class="viewer" id="viewer">
+        <div class="stage" id="stage"><img id="photo" alt="" draggable="false"><svg id="overlay" aria-hidden="true"></svg></div>
+        <div class="vtools">
+          <button type="button" class="vbtn" data-z="fit" title="Fit (F)">Fit</button>
+          <button type="button" class="vbtn" data-z="in" title="Zoom in" aria-label="Zoom in">+</button>
+          <button type="button" class="vbtn" data-z="out" title="Zoom out" aria-label="Zoom out">−</button>
+          <button type="button" class="vbtn" id="boxBtn" title="Show or hide boxes (B)" aria-pressed="true">Boxes</button>
+          <a class="vbtn" id="openImg" target="_blank" rel="noopener">Open</a>
+        </div>
+      </div>
+      <div class="info">
+        <ul class="devices" id="devices"></ul>
+        <p class="rw"><span class="muted">ROADWork tags:</span> <span id="tags"></span></p>
+        <p class="rw"><span class="muted">ROADWork description:</span> <span id="desc"></span></p>
+      </div>
+    </div>
+    <div class="ans" id="ans"></div>
+  </div>
+</section>
+
+<section id="pStudents" class="pane" role="tabpanel" aria-label="Students" hidden>
+  <div class="scroll"><div class="narrow-col wide" id="stu"></div></div>
+</section>
+
+<dialog id="connDlg" class="dlg">
+  <form method="dialog">
+    <h2>Show the answers</h2>
+    <p class="small">Paste a token that can read the answers repository. A fine-grained token with <b>Contents: Read-only</b> on that one repository is enough. The token stays in this browser; this page never writes to GitHub.</p>
+    <label class="field"><span class="lbl">GitHub token</span><input id="tokenIn" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+    <details class="adv">
+      <summary>Repository settings</summary>
+      <div class="adv-grid">
+        <label class="field"><span class="lbl">Owner</span><input id="ownerIn" type="text" spellcheck="false"></label>
+        <label class="field"><span class="lbl">Repository</span><input id="repoIn" type="text" spellcheck="false"></label>
+        <label class="field"><span class="lbl">Branch</span><input id="branchIn" type="text" spellcheck="false"></label>
+        <label class="field"><span class="lbl">Folder</span><input id="dirIn" type="text" spellcheck="false"></label>
+        <label class="field wide"><span class="lbl">API address</span><input id="apiIn" type="text" spellcheck="false"></label>
+      </div>
+    </details>
+    <p id="connMsg" class="msg" role="status"></p>
+    <div class="dlg-btns">
+      <button type="button" id="forgetBtn" class="btn">Forget token</button>
+      <button type="button" id="cancelBtn" class="btn">Cancel</button>
+      <button type="button" id="goBtn" class="btn primary">Connect</button>
+    </div>
+  </form>
+</dialog>
+
+<p id="fatal" class="fatal" hidden></p>
+<script src="data/common.js"></script>
+<script src="checks.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
